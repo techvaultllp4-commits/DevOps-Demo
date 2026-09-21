@@ -1,0 +1,82 @@
+---
+# 1. ConfigMap for Application Environment Variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devops-demo-config
+  namespace: default
+  labels:
+    app: devops-demo-app
+data:
+  PORT: "8080"
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+
+---
+# 2. Deployment for the Application Workload
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-demo-app-deployment
+  namespace: default
+  labels:
+    app: devops-demo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-demo-app
+  template:
+    metadata:
+      labels:
+        app: devops-demo-app
+    spec:
+      containers:
+        - name: devops-demo-app
+          image: myapp:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: devops-demo-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+---
+# 3. Service 
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-demo-app-service
+  namespace: default
+  labels:
+    app: devops-demo-app
+spec:
+  type: NodePort
+  selector:
+    app: devops-demo-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
