@@ -109,8 +109,8 @@ helm repo update
 Deploy Monitoring Stack:
 
 helm install monitoring prometheus-community/kube-prometheus-stack
-
-
+Access Prometheus Dashboard:
+kubectl port-forward pod/prometheus-prometheus-stack-kube-prom-prometheus-0 9090:9090 -n monitoring
 Access Grafana Dashboard:
 
 kubectl port-forward svc/monitoring-grafana 3000:80
