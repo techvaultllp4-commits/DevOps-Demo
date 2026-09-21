@@ -1,79 +1,123 @@
-# Junior DevOps Engineer – Sample App
+DevSecOps Node.js CI/CD & Monitoring Pipeline
 
-A deliberately minimal Node.js/Express app, built to give candidates something
-real to containerize, deploy, and monitor — without spending assessment time
-writing application code.
+A simple, secure DevSecOps pipeline for a Node.js application deployed on Kubernetes (Minikube) using Helm, with security scanning via Trivy and observability using Prometheus and Grafana.
+
+🏗️ Tech Stack
+
+Application: Node.js (Port 8080)
+
+Version Control: GitHub
+
+CI/CD Automation: Jenkins
+
+Containerization: Docker
+
+Security Scanning: Trivy
+
+Orchestration: Kubernetes (Minikube)
+
+Deployment Manager: Helm (2 Replicas)
+
+Monitoring & Metrics: Prometheus & Grafana
+
+🛠️ Project Architecture Workflow
+
+Developer: Pushes code changes to GitHub.
+
+Jenkins: Triggers the pipeline automatically.
+
+Containerization: Builds the Docker image for the Node.js application.
+
+Security Scan: Uses Trivy to scan the Docker image for vulnerabilities before deployment.
+
+Helm Deployment: Deploys the application to Minikube with 2 replicas.
+
+Monitoring: Prometheus scrapes application and cluster metrics; Grafana displays visual dashboards.
+
+🚀 Getting Started
+
+Prerequisites
+
+Ensure you have the following installed locally or on your server:
+
+Node.js (v18+)
+
+Docker
+
+Jenkins
+
+Trivy
+
+Minikube & kubectl
+
+Helm
+
+🔧 Local Setup & Running
+
+1. Run Node.js Application Locally
+
+# Install dependencies
+npm install
+
+# Start application
+npm start
 
 
+The app will run on http://localhost:8080.
 
-## Build & run locally
+2. Docker Build & Run
 
-```bash
-docker build -t myapp .
-docker run -p 8080:8080 -e APP_MESSAGE="Hello Kubernetes" -e API_KEY="dummy" myapp
+# Build Docker image
+docker build -t nodejs-devsecops-app:latest .
 
-```
+# Scan image using Trivy
+trivy image nodejs-devsecops-app:latest
 
-## Suggested Kubernetes wiring
+# Run Docker container locally
+docker run -d -p 8080:8080 nodejs-devsecops-app:latest
 
-- **ConfigMap**: `APP_MESSAGE`, `PORT`
-- **Secret**: `API_KEY`
-- **Readiness probe**: `GET /readyz`
-- **Liveness probe**: `GET /healthz`
-- **Service**: expose port 8080
-- **Prometheus**: scrape `/metrics`
 
-# CI/CD Pipeline & Security Scanning
+☸️ Kubernetes & Helm Deployment
 
-This repository implements an automated Continuous Integration (CI) pipeline that checks out source code, installs dependencies, runs automated tests, builds a Docker image, and scans it for security vulnerabilities before deployment.
+1. Start Minikube
 
----
+minikube start
 
-## 🔄 Pipeline Workflow
 
-The pipeline runs sequentially through five key stages:
-1. **Checkout Code:** Fetches the repository source code onto the CI runner.
-2. **Install Dependencies:** Resolves and installs required packages (e.g., `npm ci`, `pip install`, `go mod download`).
-3. **Run Tests:** Executes unit and integration test suites to verify functionality before containerization.
-4. **Docker Build:** Packages the application and its runtime environment into a Docker container image.
-5. **Trivy Security Scan:** Scans the newly created Docker image for OS/library vulnerabilities and misconfigurations.
+2. Deploy Application via Helm
 
----
+# Install / Upgrade Helm Release
+helm upgrade --install nodejs-app ./helm-chart --set replicaCount=2
 
-## 🛠️ Prerequisites
+# Check deployed pods (Should display 2 running replicas)
+kubectl get pods
 
-To run this pipeline locally or configure it on a CI platform, ensure you have:
 
-* **Git:** For source control checkout.
-* **Node.js / Python / Go (Application Language):** Required for local testing and dependency installation.
-* **Docker Engine:** Version 20.10+ required for container builds.
-* **Trivy CLI:** Required for running local security scans. [Installation Guide](https://aquasecurity.github.io/trivy/latest/getting-started/installation/)
+3. Access Application
 
----
+minikube service nodejs-app-service --url
 
-## 💻 Running Locally
 
-You can execute the entire pipeline sequence locally using the following steps:
+📊 Monitoring Setup (Prometheus & Grafana)
 
-```bash
-# 1. Checkout repository (or clone)
-git clone [https://github.com/your-username/your-repo.git](https://github.com/your-username/your-repo.git)
-cd your-repo
+Add Prometheus Helm Repository:
 
-# 2. Install dependencies
-npm ci
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
 
-# 3. Run test suite
-npm test
 
-# 4. Build Docker image
-docker build -t my-app:local .
+Deploy Monitoring Stack:
 
-# 5. Run Trivy vulnerability scan
-trivy image --severity HIGH,CRITICAL my-app:local
-- The image runs as a non-root user by default.
-- No secrets are baked into the image; everything sensitive is injected at
-  runtime, so candidates should be marked down if they hardcode `API_KEY`
-  anywhere in the Dockerfile or source.
-- `test.js` is a dependency-free smoke test so the CI pipeline's "Run Tests"
-  stage has something real and fast to execute (`node test.js`).
+helm install monitoring prometheus-community/kube-prometheus-stack
+
+
+Access Grafana Dashboard:
+
+kubectl port-forward svc/monitoring-grafana 3000:80
+
+
+Open http://localhost:3000 in your browser.
+
+📝 License
+
+This project is open-source and available under the MIT License.
