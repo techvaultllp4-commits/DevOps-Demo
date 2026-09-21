@@ -23,8 +23,16 @@ docker run -p 8080:8080 -e APP_MESSAGE="Hello Kubernetes" -e API_KEY="dummy" mya
 - **Service**: expose port 8080
 - **Prometheus**: scrape `/metrics`
 
-## Notes for evaluators
-
+## CI Pipeline
+Checkout
+↓
+Install Dependencies
+↓
+Run Tests
+↓
+Docker Build
+↓
+Trivy Security Scan
 - The image runs as a non-root user by default.
 - No secrets are baked into the image; everything sensitive is injected at
   runtime, so candidates should be marked down if they hardcode `API_KEY`
