@@ -1,0 +1,25 @@
+pipeline{
+	agent any
+	stages{
+		stage('Checkout'){
+			steps{
+				git branch: 'main', url: 'https://github.com/techvaultllp4-commits/DevOps-Demo.git'
+			}
+			}
+		stage('Install Dependecies'){
+			steps{
+				sh 'npm install'
+			}
+			}
+		stage('Test'){
+			steps{
+				sh 'docker build -t myapp .'
+			}	
+			}
+		stage('trivy scan'){
+			steps{
+				sh 'trivy image --security HIGH,CRITICAL myapp'
+			}
+			}
+}
+}
