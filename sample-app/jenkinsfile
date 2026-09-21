@@ -8,6 +8,7 @@ pipeline{
 			}
 		stage('Install Dependecies'){
 			steps{
+				sh'cd sample-app'
 				sh 'npm install'
 			}
 			}
